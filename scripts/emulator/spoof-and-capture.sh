@@ -5,9 +5,9 @@
 #      reads SM-S928B from Build.MODEL / client hints.
 #   3. Skip Chrome first-run / welcome / default-browser / sync
 #   4. Open https://www.google.com in Chrome
-#   5. Open the Google search for newscredo.com
-#   6. Via Chrome DevTools: find the result link to https://newscredo.com, scroll smoothly, tap it
-#   7. On newscredo.com: smooth-scroll, randomly dwell 70-120s, tap internal links
+#   5. Open the Google search for gardengar.com
+#   6. Via Chrome DevTools: find the result link to https://gardengar.com, scroll smoothly, tap it
+#   7. On gardengar.com: smooth-scroll, randomly dwell 70-120s, tap internal links
 #      (articles / categories), repeat browse cycle 2 times, screenshots to artifacts/
 set -euo pipefail
 ROOT="${GITHUB_WORKSPACE:-$(pwd)}"
@@ -16,7 +16,7 @@ mkdir -p "$ARTIFACTS"
 CHROME_PKG="com.android.chrome"
 TARGET_URL="https://www.google.com"
 SEARCH_URL="https://www.google.com/search?q=gardengar.com"
-RESULT_HOST="gardengar.com"   # result link to click: https://newscredo.com
+RESULT_HOST="gardengar.com"   # result link to click: https://gardengar.com
 RESULT_TEXT="Gardengar"
 HAVE_ROOT=0
 log() { printf '[capture] %s\n' "$*"; }
@@ -262,7 +262,7 @@ open_url() {
 wait_for_page() {
   sleep "${1:-6}"
 }
-# Find "Newscredo - News" in the real page DOM through Chrome DevTools
+# Find "gardengar - News" in the real page DOM through Chrome DevTools
 # (uiautomator cannot see web page text in Chrome, only the toolbar),
 # scroll smoothly until it is in view, then tap it with a real touch gesture.
 tap_search_result() {
@@ -349,7 +349,7 @@ FIND_JS = """(() => {
       const cite = (a.getAttribute('data-href') || a.getAttribute('ping') ||
                     a.getAttribute('data-jsarwt') || '').toLowerCase();
       if (cite.includes(HOST)) return true;
-      // visible text often shows "newscredo.com" under the title
+      // visible text often shows "gardengar.com" under the title
       const txt = ((a.innerText || '') + ' ' + (a.textContent || '')).toLowerCase();
       if (txt.includes(HOST) || txt.includes(TEXT)) return true;
       // parent result block may contain the cite URL
@@ -468,10 +468,10 @@ sys.exit(0 if HOST in (js("location.href") or "").lower() else 1)
 PY
 }
 # ---------------------------------------------------------------------------
-# Browse newscredo.com: smooth random scrolls + random internal link taps
+# Browse gardengar.com: smooth random scrolls + random internal link taps
 # Cycle: open page → smooth scroll → dwell 70-120s → tap link → repeat ×2
 # ---------------------------------------------------------------------------
-browse_newscredo() {
+browse_gardengar() {
   python3 -m pip install -q websocket-client --break-system-packages >/dev/null 2>&1 \
     || python3 -m pip install -q websocket-client >/dev/null 2>&1 || true
   adb forward tcp:9222 localabstract:chrome_devtools_remote >/dev/null 2>&1 || true
@@ -492,8 +492,8 @@ tab = None
 for _ in range(40):
     try:
         pages = [t for t in get_tabs() if t.get("type") == "page"]
-        # prefer the newscredo tab
-        pages.sort(key=lambda t: 0 if "newscredo.com" in t.get("url", "") else 1)
+        # prefer the gardengar tab
+        pages.sort(key=lambda t: 0 if "gardengar.com" in t.get("url", "") else 1)
         if pages:
             tab = pages[0]
             break
@@ -704,7 +704,7 @@ try:
 except Exception:
     pass
 
-print("\nbrowse_newscredo finished", flush=True)
+print("\nbrowse_gardengar finished", flush=True)
 print("visited:", list(visited), flush=True)
 ws.close()
 PY
@@ -760,15 +760,15 @@ open_url "$SEARCH_URL"
 wait_for_page 6
 dismiss_chrome_sheets
 screenshot "02-search-results.png"
-# 3) scroll smoothly until "Newscredo - News" is found, then tap it
+# 3) scroll smoothly until "gardengar - News" is found, then tap it
 if tap_search_result; then
   wait_for_page 10
-  screenshot "03-newscredo-opened.png"
+  screenshot "03-gardengar-opened.png"
   sleep 6
-  screenshot "04-newscredo-late.png"
+  screenshot "04-gardengar-late.png"
   # 4) realistic browsing: smooth scroll + random internal taps, 2 cycles
-  log "starting realistic browse on newscredo.com (2 cycles, 70-120s dwell each)"
-  browse_newscredo
+  log "starting realistic browse on gardengar.com (2 cycles, 70-120s dwell each)"
+  browse_gardengar
   screenshot "08-browse-done.png"
 else
   log "could not find a link to ${RESULT_HOST} in results"
